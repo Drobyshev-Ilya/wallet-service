@@ -1,10 +1,3 @@
-"""initial migration
-
-Revision ID: initial_migration
-Revises: 
-Create Date: 2024-04-08 10:01:16.000000
-
-"""
 from typing import Sequence, Union
 
 from alembic import op
