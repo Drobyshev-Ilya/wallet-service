@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
-# Use localhost when running locally, db when running in Docker
+# Используйте localhost при локальном запуске, db при запуске в Docker
 host = "localhost" if os.environ.get("LOCAL_TEST") else "db"
 DATABASE_URL = f"postgresql+asyncpg://postgres:12345678@{host}:5432/wallet_db"
 
