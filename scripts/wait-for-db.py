@@ -7,7 +7,7 @@ async def check_db():
     retries = 30
     while retries > 0:
         try:
-            # First connect to default database
+            # подключение к базе данных по умолчанию
             conn = await asyncpg.connect(
                 user='postgres',
                 password='12345678',
@@ -15,20 +15,20 @@ async def check_db():
                 host='db'
             )
             
-            # Check if our test database exists
+            # Проверка, существует ли тестовая база данных
             exists = await conn.fetchval(
                 "SELECT 1 FROM pg_database WHERE datname = $1",
                 'test_wallet_db'
             )
             
             if not exists:
-                # Create test database if it doesn't exist
+                # Создает тестовую базу данных, если она не существует
                 await conn.execute('CREATE DATABASE test_wallet_db')
                 print("Created test_wallet_db database")
             
             await conn.close()
             
-            # Test connection to our test database
+            # Тестовое подключение к тестовой базе данных
             test_conn = await asyncpg.connect(
                 user='postgres',
                 password='12345678',
