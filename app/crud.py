@@ -8,6 +8,7 @@ import uuid
 from fastapi import HTTPException
 
 async def get_wallet(db: AsyncSession, wallet_id: str) -> Wallet:
+    """Получает кошелёк по ID"""
     result = await db.execute(select(Wallet).where(Wallet.id == wallet_id))
     wallet = result.scalar_one_or_none()
     if not wallet:
@@ -15,6 +16,7 @@ async def get_wallet(db: AsyncSession, wallet_id: str) -> Wallet:
     return wallet
 
 async def create_wallet(db: AsyncSession) -> Wallet:
+    """Создаёт новый кошелёк"""
     wallet = Wallet(id=str(uuid.uuid4()))
     db.add(wallet)
     await db.commit()
@@ -27,7 +29,8 @@ async def update_wallet_balance(
     operation_type: OperationType, 
     amount: Decimal
 ) -> Wallet:
-    # Lock the wallet row for update
+    """Обновляет баланс кошелька"""
+    # Блокирует строку кошелька для обновления
     stmt = select(Wallet).where(Wallet.id == wallet_id).with_for_update()
     result = await db.execute(stmt)
     wallet = result.scalar_one_or_none()
@@ -43,7 +46,7 @@ async def update_wallet_balance(
             raise HTTPException(status_code=400, detail="Insufficient funds")
         new_balance -= amount
     
-    # Update with new balance
+    # Обновляет с новым балансом
     wallet.balance = new_balance
     await db.commit()
     await db.refresh(wallet)
