@@ -5,14 +5,14 @@ from .routes import wallet
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan event handler for FastAPI app."""
+    """Обработчик событий продолжительности жизни для приложения FastAPI."""
     try:
-        # Startup: Create database tables
+        # Запуск: Создание таблиц базы данных
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         yield
     finally:
-        # Shutdown: Dispose engine
+        # Завершение работы: Уничтожение движка
         await engine.dispose()
 
 app = FastAPI(
