@@ -83,6 +83,24 @@ POST /api/v1/wallets/{wallet_id}/operation
 }
 ```
 
+### Просмотр записей БД в контейнере
+Подключение к БД в контейнере
+```docker-compose exec db psql -U postgres wallet_db
+```
+
+Список таблиц
+```\dt
+```
+
+Показать все записи в из таблицы wallets
+```SELECT * FROM wallets;
+```
+
+выход из подключения к БД в контейнере
+```\q
+```
+
+
 ## Тестирование
 
 ### Запуск тестов через Docker
