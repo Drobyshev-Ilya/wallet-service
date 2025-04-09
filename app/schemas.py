@@ -5,8 +5,8 @@ from typing import Optional
 from datetime import datetime
 
 class OperationType(str, Enum):
-    DEPOSIT = "DEPOSIT"
-    WITHDRAW = "WITHDRAW"
+    DEPOSIT = "DEPOSIT"  # Пополнение
+    WITHDRAW = "WITHDRAW"  # Снятие
 
 class Operation(BaseModel):
     operation_type: str
