@@ -7,13 +7,13 @@ from sqlalchemy.orm import sessionmaker
 import asyncio
 import platform
 
-# Add the project root to Python path
+# Добавляем корень проекта в Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app.main import app
 from app.database import Base, get_db
 
-# Use environment variable to determine if we're testing locally
+# Используем переменную окружения для определения локального тестирования
 is_local = os.environ.get('LOCAL_TEST') == '1'
 host = 'localhost' if is_local else 'db'
 
@@ -21,14 +21,14 @@ DATABASE_URL = f"postgresql+asyncpg://postgres:12345678@{host}:5432/test_wallet_
 
 @pytest.fixture(scope="session")
 def event_loop_policy():
-    """Create an instance of the default event loop policy for the test session."""
+    """Создаёт политику цикла событий для тестовой сессии."""
     if platform.system() == 'Windows':
         return asyncio.WindowsSelectorEventLoopPolicy()
     return asyncio.get_event_loop_policy()
 
 @pytest.fixture(autouse=True)
 async def setup_database():
-    """Create a fresh test database for each test."""
+    """Создаёт свежую тестовую базу данных для каждого теста."""
     engine = create_async_engine(DATABASE_URL, echo=True)
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -44,7 +44,7 @@ async def setup_database():
 
 @pytest.fixture
 async def client(setup_database):
-    """Create a test client with a fresh database session."""
+    """Фикстура для создания HTTP-клиента для тестирования."""
     async def override_get_db():
         async with setup_database() as session:
             yield session
@@ -56,6 +56,7 @@ async def client(setup_database):
 
 @pytest.mark.asyncio
 async def test_create_wallet(client):
+    """Тест создания нового кошелька"""
     response = await client.post("/api/v1/wallets")
     assert response.status_code == 200
     assert "id" in response.json()
@@ -64,11 +65,12 @@ async def test_create_wallet(client):
 
 @pytest.mark.asyncio
 async def test_get_wallet_balance(client):
-    # First create a wallet
+    """Тест получения баланса кошелька"""
+    # Создаём кошелёк
     create_response = await client.post("/api/v1/wallets")
     wallet_id = create_response.json()["id"]
     
-    # Then get its balance
+    # Получаем баланс
     response = await client.get(f"/api/v1/wallets/{wallet_id}")
     assert response.status_code == 200
     assert response.json()["id"] == wallet_id
@@ -76,11 +78,12 @@ async def test_get_wallet_balance(client):
 
 @pytest.mark.asyncio
 async def test_wallet_operations(client):
-    # Create wallet
+    """Тест операций с кошельком (пополнение/списание)"""
+    # Создаём кошелёк
     create_response = await client.post("/api/v1/wallets")
     wallet_id = create_response.json()["id"]
     
-    # Deposit
+    # Пополняем баланс
     deposit_response = await client.post(
         f"/api/v1/wallets/{wallet_id}/operation",
         json={"operation_type": "DEPOSIT", "amount": "100.50"}
@@ -88,7 +91,7 @@ async def test_wallet_operations(client):
     assert deposit_response.status_code == 200
     assert deposit_response.json()["balance"] == "100.50"
     
-    # Withdraw
+    # Снимаем средства
     withdraw_response = await client.post(
         f"/api/v1/wallets/{wallet_id}/operation",
         json={"operation_type": "WITHDRAW", "amount": "50.25"}
@@ -98,5 +101,6 @@ async def test_wallet_operations(client):
 
 @pytest.mark.asyncio
 async def test_wallet_not_found(client):
+    """Тест получения кошелька, которого не существует"""
     response = await client.get("/api/v1/wallets/nonexistent")
     assert response.status_code == 404
