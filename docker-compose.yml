@@ -1,0 +1,24 @@
+services:
+  web:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:12345678@db:5432/wallet_db
+      - TEST_DATABASE_URL=postgresql+asyncpg://postgres:12345678@db:5432/test_wallet_db
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=12345678
+      - POSTGRES_DB=wallet_db
+
+volumes:
+  postgres_data:
