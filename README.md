@@ -136,6 +136,39 @@ pytest tests/test_wallet.py -v
 └── README.md          # Документация
 ```
 
+
+## Управление миграциями базы данных
+
+### Существующие миграции
+Первоначальная миграция находится в:
+```
+alembic/versions/initial_migration.py
+```
+
+Она создает таблицу `wallets` со следующей структурой:
+```sql
+CREATE TABLE wallets (
+    id VARCHAR NOT NULL,
+    balance NUMERIC(18,2) NOT NULL DEFAULT '0',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE ON UPDATE now(),
+    PRIMARY KEY (id)
+)
+```
+
+### Процесс изменения модели
+
+1. Изменить модель в `app/models.py`
+2. Создайть новую миграцию:
+```bash
+alembic revision --autogenerate -m "описание_изменений"
+```
+3. Проверить сгенерированный файл миграции в `alembic/versions/`
+4. Применить миграцию:
+```bash
+alembic upgrade head
+```
+
 ## Настройка базы данных
 
 Для изменения настроек базы данных необходимо обновить следующие файлы:
@@ -174,12 +207,6 @@ DATABASE_URL = "postgresql+asyncpg://postgres:новый_пароль@db:5432/н
 2. Удалить старые данные: `docker volume rm wallet_service_postgres_data`
 3. Запустить заново: `docker-compose up -d`
 
-Важные замечания:
-- Пароль должен быть одинаковым во всех файлах
-- Имя пользователя (`postgres`) обычно не меняется
-- Хост (`db`) останется прежним, так как это имя контейнера в Docker Compose
-- Порт (`5432`) обычно не меняется, так как это стандартный порт PostgreSQL
-- Если меняете порт, обновите его во всех URL базы данных
 
 ## База данных
 
